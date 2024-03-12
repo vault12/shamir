@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors; 
+import java.util.stream.IntStream; 
 import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 
@@ -124,6 +126,35 @@ class SchemeTest implements WithQuickTheories {
                   .map(entries -> join(scheme, entries))
                   .noneMatch(s -> Arrays.equals(s, secret));
             });
+  }
+
+  @Test
+  void restorePartRoundtrip() {
+    qt().forAll(integers().between(2, 5), integers().between(1, 5), byteArrays(1, 300))
+        .asWithPrecursor((k, extra, secret) -> new Scheme(new SecureRandom(), k + extra, k))
+        .checkAssert((k, e, secret, scheme) -> {
+            final Map<Integer, byte[]> splits = scheme.split(secret);
+            final Map<Integer, byte[]> partsToRestoreFrom = new HashMap<>();
+            final List<Integer> indexes = IntStream.rangeClosed(1, k + e).boxed().collect(Collectors.toList());
+            Collections.shuffle(indexes);
+            for (int i = 0; i < k; i++) {
+                partsToRestoreFrom.put(indexes.get(i), splits.get(indexes.get(i)));
+            }
+
+            // pick a random index for the restored part
+            final int restoredPartIdx = indexes.get(k);
+
+            final byte[] restoredPart = scheme.restorePart(partsToRestoreFrom, restoredPartIdx);
+            final Map<Integer, byte[]> splitsWithRestored = new HashMap<>();
+            splitsWithRestored.put(restoredPartIdx, restoredPart);
+            for (int i = 0; i < k; i++) {
+                if (i != restoredPartIdx) {
+                    splitsWithRestored.put(indexes.get(i), splits.get(indexes.get(i)));
+                }
+            }
+            final byte[] joined = scheme.join(splitsWithRestored);
+            assertThat(joined).isEqualTo(secret);
+        });
   }
 
   private byte[] join(Scheme scheme, Set<Map.Entry<Integer, byte[]>> entries) {

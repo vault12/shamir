@@ -200,8 +200,12 @@ class GF256 {
 
   static byte interpolate(byte[][] points) {
     // calculate f(0) of the given points using Lagrangian interpolation
-    final byte x = 0;
-    byte y = 0;
+    return interpolate(points, (byte)0);
+  }
+
+  static byte interpolate(byte[][] points, byte partIdx) {
+    // calculate f(partIdx) of the given points using Lagrangian interpolation
+    byte x = partIdx, y = 0;
     for (int i = 0; i < points.length; i++) {
       final byte aX = points[i][0];
       final byte aY = points[i][1];

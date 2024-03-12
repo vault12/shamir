@@ -114,6 +114,37 @@ public class Scheme {
   }
 
   /**
+   * Restores a part given the original parts and a new index.
+   *
+   * <p><b>N.B.:</b> There is no way to determine whether or not the returned value is actually a
+   * valid part. If the parts are incorrect, or are under the threshold value used to split the
+   * secret, a random value will be returned.
+   *
+   * @param parts a map of part IDs to part values
+   * @param partIdx the index for the part to restore
+   * @return the restored part
+   * @throws IllegalArgumentException if {@code parts} is less than 2 or contains values of varying
+   *     lengths
+   */
+  public byte[] restorePart(Map<Integer, byte[]> parts, int partIdx) {
+    checkArgument(parts.size() > 1, "Need at least two parts");
+    final int[] lengths = parts.values().stream().mapToInt(v -> v.length).distinct().toArray();
+    checkArgument(lengths.length == 1, "Parts have varying lengths");
+    final byte[] restoredPart = new byte[lengths[0]];
+    for (int i = 0; i < restoredPart.length; i++) {
+      final byte[][] points = new byte[parts.size()][2];
+      int j = 0;
+      for (Map.Entry<Integer, byte[]> part : parts.entrySet()) {
+        points[j][0] = part.getKey().byteValue();
+        points[j][1] = part.getValue()[i];
+        j++;
+      }
+      restoredPart[i] = GF256.interpolate(points, (byte)partIdx);
+    }
+    return restoredPart;
+  }
+
+  /**
    * The number of parts the scheme will generate when splitting a secret.
    *
    * @return {@code N}
