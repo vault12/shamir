@@ -113,7 +113,7 @@ function restorePart(parts, partIdx) {
   const lengths = Object.values(parts).map(x => x.length);
   const max = Math.max.apply(null, lengths);
   const min = Math.min.apply(null, lengths);
-  if (max !== min) {``
+  if (max !== min) {
     throw new Error(`Parts have varying lengths. Min ${min}, Max ${max}`);
   }
   const restoredPart = new Uint8Array(max);

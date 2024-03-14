@@ -100,7 +100,7 @@ test('restorePart roundtrip', function(t) {
   const partsToRestoreFrom = { '1': splits['1'], '2': splits['2'] };  
   const restoredPart = restorePart(partsToRestoreFrom, 3);  
   const splitsWithRestored = {'1': splits['1'], '3': restoredPart};
-  const joined = bytesToSring(join(splitsWithRestored))
+  const joined = bytesToSring(join(splitsWithRestored));
   t.deepEqual(secretUtf8, joined);
   t.end();
 });
