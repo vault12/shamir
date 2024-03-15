@@ -98,3 +98,39 @@ function join(parts) {
 }
 
 exports.join = join;
+
+
+/**
+ * Restores a part given a map of parts and a new index.
+ *
+ * @param {Object.<string, Uint8Array>} parts a map of part IDs to part values
+ * @param {number} partIdx the new index for the part
+ * @return {Uint8Array} the restored part
+ * @throws {Error} if parts is empty or contains values of varying lengths
+ */
+function restorePart(parts, partIdx) {
+  if (Object.keys(parts).length <= 1) throw new Error('Need at least two parts');
+  const lengths = Object.values(parts).map(x => x.length);
+  const max = Math.max.apply(null, lengths);
+  const min = Math.min.apply(null, lengths);
+  if (max !== min) {
+    throw new Error(`Parts have varying lengths. Min ${min}, Max ${max}`);
+  }
+  const restoredPart = new Uint8Array(max);
+  for (let i = 0; i < restoredPart.length; i++) {
+    const keys = Object.keys(parts);
+    const points = new Array(keys.length)
+      .fill(0)
+      .map(() => new Uint8Array(2).fill(0));
+    for (let j = 0; j < keys.length; j++) {
+      const key = keys[j];
+      const k = Number(key);
+      points[j][0] = k;
+      points[j][1] = parts[key][i];
+    }
+    restoredPart[i] = GF256.interpolate(points, partIdx);
+  }
+  return restoredPart;
+}
+
+exports.restorePart = restorePart;

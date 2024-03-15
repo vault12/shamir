@@ -16,7 +16,7 @@
 
 const test = require('tape');
 
-const { split, join } = require('../../main/js/Scheme.js');
+const { split, join, restorePart } = require('../../main/js/Scheme.js');
 
 const { randomBytes } = require('crypto');
 
@@ -86,6 +86,22 @@ test('SchemeTests roundtrip two parts', function (t) {
     t.equal(secretUtf8, joinedUtf8);
   }
 
+  t.end();
+});
+
+test('restorePart roundtrip', function(t) {
+  const parts = 5;
+  const quorum = 2;
+  const secretUtf8 = `ᚠᛇᚻ᛫ᛒᛦᚦ᛫ᚠᚱᚩᚠᚢᚱ᛫ᚠᛁᚱᚪ᛫ᚷᛖᚻᚹᛦᛚᚳᚢᛗ
+ᛋᚳᛖᚪᛚ᛫ᚦᛖᚪᚻ᛫ᛗᚪᚾᚾᚪ᛫ᚷᛖᚻᚹᛦᛚᚳ᛫ᛗᛁᚳᛚᚢᚾ᛫ᚻᛦᛏ᛫ᛞᚫᛚᚪᚾ
+ᚷᛁᚠ᛫ᚻᛖ᛫ᚹᛁᛚᛖ᛫ᚠᚩᚱ᛫ᛞᚱᛁᚻᛏᚾᛖ᛫ᛞᚩᛗᛖᛋ᛫ᚻᛚᛇᛏᚪᚾ᛬`;
+  const secret = stringToBytes(secretUtf8); 
+  const splits = split(randomBytes, parts, quorum, secret);
+  const partsToRestoreFrom = { '1': splits['1'], '2': splits['2'] };  
+  const restoredPart = restorePart(partsToRestoreFrom, 3);  
+  const splitsWithRestored = {'1': splits['1'], '3': restoredPart};
+  const joined = bytesToSring(join(splitsWithRestored));
+  t.deepEqual(secretUtf8, joined);
   t.end();
 });
 

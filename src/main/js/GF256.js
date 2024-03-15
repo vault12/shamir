@@ -177,11 +177,12 @@ function degree(p) {
 exports.degree = degree;
 
 /**
- * Calculates f(0) of the given points using Lagrangian interpolation.
+ * Calculates f(partIdx) of the given points using Lagrangian interpolation.
  * @param  {array[Uint8Array]} points The supplied point.
+ * @param  {Number} partIdx The index to interpolate at.
  */
-function interpolate(points) {
-  const x = 0;
+function interpolate(points, partIdx = 0) {
+  const x = partIdx;
   let y = 0;
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < points.length; i++) {

@@ -3,6 +3,7 @@
   "version": "0.7.1",
   "description": "A JavaScript implementation of Shamir's Secret Sharing algorithm over GF(256).",
   "main": "src/main/js/Scheme.js",
+  "typings": "./shamir.d.ts",
   "scripts": {
     "test": "tape src/test/js/GF256Tests.js src/test/js/SchemeTests.js src/test/js/TieredSharing.js",
     "testwithjava": "node --jvm --vm.cp=./target/classes:./target/test-classes src/test/js/PolygotTests.js",
